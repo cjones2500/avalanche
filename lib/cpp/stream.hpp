@@ -21,10 +21,12 @@ namespace avalanche {
      * @see watchDispatcher()
      */
     struct dispatcherState : public streamState {
-        std::queue<TObject*>* queue;
-        pthread_mutex_t* queueMutex;
-        zmq::socket_t* socket;
-        int flags;
+        //std::queue<TObject*>* queue;
+        //pthread_mutex_t* queueMutex;
+        //bool* is_cancelled;
+        zmq::context_t* context;
+        std::string address;
+        std::string si_address;
     };
 
     /**
@@ -33,8 +35,9 @@ namespace avalanche {
      * @see watchDB()
      */
     struct dbState : public streamState {
-        std::queue<TObject*>* queue;
-        pthread_mutex_t* queueMutex;
+        //std::queue<TObject*>* queue;
+        //pthread_mutex_t* queueMutex;
+        //bool* is_cancelled;
         std::string host;
         std::string dbname;
         docObjectMap map;

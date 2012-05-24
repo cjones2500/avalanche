@@ -10,8 +10,10 @@
 #include <json/value.h>
 
 class TObject;
+class TBufferFile;
 
 namespace avalanche {
+    struct si_worker_arg;
 
     /** 
      * An avalanche dispatcher server
@@ -19,8 +21,7 @@ namespace avalanche {
      * The server serializes ROOT TObjects and sends them out on a ZeroMQ
      * publish socket, to which many clients may be subscribed
      */
-    class server
-    {
+    class server {
         public:
             /**
              * Create an avalanche server
@@ -29,7 +30,7 @@ namespace avalanche {
             server(std::string _addr);
 
             /** Destroy this server, closing any open connections */
-            ~server() {};
+            ~server();
 
             /**
              * Send a TObject
@@ -41,7 +42,13 @@ namespace avalanche {
         protected:
             std::string address;     //!< The local server address
             zmq::context_t* context; //!< ZeroMQ context for the server socket
-            zmq::socket_t* socket;   //!< ZeroMQ server socket
+            zmq::socket_t* socket;   //!< ZeroMQ PUB server socket for TObject
+
+        private:
+            std::string si_address;
+            struct si_worker_arg* si_arg;
+            TBufferFile* bf;
+            pthread_t si_handle;
     };
 
     /**
@@ -59,6 +66,7 @@ namespace avalanche {
     struct streamState {
         std::queue<TObject*>* queue;
         pthread_mutex_t* queueMutex;
+        bool* is_cancelled;
     };
 
     /**
@@ -122,7 +130,6 @@ namespace avalanche {
             std::queue<TObject*> queue;  //!< Buffer of received objects
             pthread_mutex_t* queueMutex; //!< Mutex protection for queue
             zmq::context_t* context;     //!< ZeroMQ context for dispatcher
-            zmq::socket_t* socket;       //!< ZeroMQ socket for dispatcher
             /** A map serving as a list of "watcher" threads and their state */
             std::map<pthread_t*, streamState*> threads;
             /**
