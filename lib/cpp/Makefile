@@ -1,4 +1,4 @@
-CFLAGS = -fPIC -g -DDEBUG
+CFLAGS = -fPIC -g -DDEBUG=0
 INCDIR = -I.
 LDFLAGS = -L/usr/local/lib
 
@@ -30,4 +30,5 @@ libavalanche:
 
 clean:
 	-$(RM) *.o *.so
+	-$(RM) -r *.dSYM
 
