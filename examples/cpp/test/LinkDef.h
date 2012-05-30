@@ -15,11 +15,15 @@
     #pragma link C++ class vector<SNOT::CaenHeader>;
     #pragma link C++ class SNOT::MTC+;
     #pragma link C++ class vector<SNOT::MTC>;
-    #pragma link C++ struct SNOT::PackedEvent;
-    #pragma link C++ struct vector<SNOT::PackedEvent>;
-    #pragma link C++ struct SNOT::CAAC;
-    #pragma link C++ struct vector<SNOT::CAAC>;
-    #pragma link C++ struct SNOT::CAST;
-    #pragma link C++ struct vector<SNOT::CAST>;
+    #pragma link C++ class SNOT::PackedEvent;
+    #pragma link C++ class vector<SNOT::PackedEvent>;
+    #pragma link C++ class SNOT::CAAC;
+    #pragma link C++ class vector<SNOT::CAAC>;
+    #pragma link C++ class SNOT::CAST;
+    #pragma link C++ class vector<SNOT::CAST>;
+    #pragma link C++ class SNOT::CMOSRate;
+    #pragma link C++ class vector<SNOT::CMOSRate>;
+    #pragma link C++ class SNOT::FIFOState;
+    #pragma link C++ class std::vector<SNOT::FIFOState>;
 #endif
 

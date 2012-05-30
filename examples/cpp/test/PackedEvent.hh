@@ -7,9 +7,9 @@
 
 namespace SNOT {
 
-class PMT_cccc {
+class PMT_cccc: public TObject {
     public:
-        PMT_cccc(): nhit_cccc(0),
+        PMT_cccc(): TObject(), nhit_cccc(0),
             Crate(0), Card(0), Channel(0), Cell(0), CGT16(0),
             CGT24(0), ES16(0), Missed(0), NC(0), LGI(0) {}
 
@@ -27,7 +27,7 @@ class PMT_cccc {
         }
 
         PMT_cccc(const PMT_cccc &src):
-            nhit_cccc(src.nhit_cccc),
+            TObject(), nhit_cccc(src.nhit_cccc),
             Crate(0), Card(0), Channel(0), Cell(0), CGT16(0),
             CGT24(0), ES16(0), Missed(0), NC(0), LGI(0) {
             if (nhit_cccc) {
@@ -349,7 +349,7 @@ class PackedEvent : public TObject {
             caen_trace6(CaenTrace()), caen_trace7(CaenTrace()), genericRec(0) {
 
             if (src.genericRec) {
-                genericRec = src.genericRec->Clone(); //this uses Streamer (dictionary and gDirectory)
+                genericRec = src.genericRec->Clone();
             }
         }
             
@@ -400,106 +400,199 @@ class PackedEvent : public TObject {
 };
 
 class CAST : public TObject {
-public:
-  CAST() : TObject() { Init(); };
-  CAST(const CAST &rhs) : TObject() { Init(); CopyObj(rhs); };
-  virtual ~CAST() {};
-  virtual CAST &operator=(const CAST &rhs) { CopyObj(rhs); return *this; };
+    public:
+        CAST(): TObject(),
+            SourceID(0), SourceStat(0), NRopes(0),
+            ManipPos(), ManipDest(), SrcPosUncert1(0),
+            SrcPosUncert2(), LBallOrient(0), RopeID(0), RopeLen(0),
+            RopeTargLen(0), RopeVel(0), RopeTens(0), RopeErr(0) {}
 
-  // Members
-  UShort_t SourceID;
-  UShort_t SourceStat;
-  UShort_t NRopes;
-  float ManipPos[3];
-  float ManipDest[3];
-  float SrcPosUncert1;
-  float SrcPosUncert2[3];
-  float LBallOrient;
-  std::vector<int> RopeID;
-  std::vector<float> RopeLen;
-  std::vector<float> RopeTargLen;
-  std::vector<float> RopeVel;
-  std::vector<float> RopeTens;
-  std::vector<float> RopeErr;
 
-  // ROOT junk
-  ClassDef(CAST,2)
+        virtual ~CAST() {
+            if (NRopes) {
+                delete [] RopeID;
+                delete [] RopeLen;
+                delete [] RopeTargLen;
+                delete [] RopeVel;
+                delete [] RopeTens;
+                delete [] RopeErr;
+            }
+        }
 
-protected:
-  virtual void Init() {
-    for(int i=0;i<3;++i){
-      ManipPos[i] = 0.;
-      ManipDest[i] = 0.;
-      SrcPosUncert2[i] = 0.;
-    }
-    SourceID = 0;
-    SourceStat = 0;
-    NRopes = 0;
-    SrcPosUncert1 = 0.;
-    LBallOrient = 0.;
-    RopeID.resize(0);
-    RopeLen.resize(0);
-    RopeTargLen.resize(0);
-    RopeVel.resize(0);
-    RopeTens.resize(0);
-    RopeErr.resize(0);
-  }
-  
-  virtual void CopyObj(const CAST &rhs) {
-    for(int i=0;i<3;++i){
-      ManipPos[i] = rhs.ManipPos[i];
-      ManipDest[i] = rhs.ManipDest[i];
-      SrcPosUncert2[i] = rhs.SrcPosUncert2[i];
-    }
-    SourceID = rhs.SourceID;
-    SourceStat = rhs.SourceStat;
-    NRopes = rhs.NRopes;
-    SrcPosUncert1 = rhs.SrcPosUncert1;
-    LBallOrient = rhs.LBallOrient;
-    RopeID = rhs.RopeID;
-    RopeLen = rhs.RopeLen;
-    RopeTargLen = rhs.RopeTargLen;
-    RopeVel = rhs.RopeVel;
-    RopeTens = rhs.RopeTens;
-    RopeErr = rhs.RopeErr;
-  }
+        CAST(const CAST &src): TObject(),
+            SourceID(src.SourceID), SourceStat(src.SourceStat), NRopes(src.NRopes),
+            ManipPos(), ManipDest(), SrcPosUncert1(src.SrcPosUncert1), SrcPosUncert2(),
+            LBallOrient(src.LBallOrient), RopeID(0), RopeLen(0),
+            RopeTargLen(0), RopeVel(0), RopeTens(0), RopeErr(0) {
+
+            memcpy(ManipPos, src.ManipPos, 3 * sizeof(Float_t));
+            memcpy(ManipDest, src.ManipDest, 3 * sizeof(Float_t));
+            memcpy(SrcPosUncert2, src.SrcPosUncert2, 3 * sizeof(Float_t));
+
+            if (NRopes) {
+                RopeID = new UInt_t[NRopes];
+                memcpy(RopeID, src.RopeID, NRopes * sizeof(UInt_t));
+                RopeLen = new Float_t[NRopes];
+                memcpy(RopeLen, src.RopeLen, NRopes * sizeof(Float_t));
+                RopeTargLen = new Float_t[NRopes];
+                memcpy(RopeTargLen, src.RopeTargLen, NRopes * sizeof(Float_t));
+                RopeVel = new Float_t[NRopes];
+                memcpy(RopeVel, src.RopeVel, NRopes * sizeof(Float_t));
+                RopeTens = new Float_t[NRopes];
+                memcpy(RopeTens, src.RopeTens, NRopes * sizeof(Float_t));
+                RopeErr = new Float_t[NRopes];
+                memcpy(RopeErr, src.RopeErr, NRopes * sizeof(Float_t));
+            }
+        }
+
+        CAST &operator=(const CAST &rhs) {
+            if (&rhs == this) return *this;
+            if (NRopes) {
+                delete [] RopeID;
+                delete [] RopeLen;
+                delete [] RopeTargLen;
+                delete [] RopeVel;
+                delete [] RopeTens;
+                delete [] RopeErr;
+            }
+            SourceID = rhs.SourceID;
+            SourceStat = rhs.SourceStat;
+            NRopes = rhs.NRopes;
+            memcpy(ManipPos, rhs.ManipPos, 3 * sizeof(Float_t));
+            memcpy(ManipDest, rhs.ManipDest, 3 * sizeof(Float_t));
+            SrcPosUncert1 = rhs.SrcPosUncert1;
+            memcpy(SrcPosUncert2, rhs.SrcPosUncert2, 3 * sizeof(Float_t));
+            LBallOrient = rhs.LBallOrient;
+            if (NRopes) {
+                memcpy(RopeID, rhs.RopeID, NRopes * sizeof(UInt_t));
+                memcpy(RopeLen, rhs.RopeLen, NRopes * sizeof(Float_t));
+                memcpy(RopeTargLen, rhs.RopeTargLen, NRopes * sizeof(Float_t));
+                memcpy(RopeVel, rhs.RopeVel, NRopes * sizeof(Float_t));
+                memcpy(RopeTens, rhs.RopeTens, NRopes * sizeof(Float_t));
+                memcpy(RopeErr, rhs.RopeErr, NRopes * sizeof(Float_t));
+            }
+            else {
+                RopeID = 0;
+                RopeLen = 0;
+                RopeTargLen = 0;
+                RopeVel = 0;
+                RopeTens = 0;
+                RopeErr = 0;
+            }
+            return *this;
+        }
+
+        UShort_t SourceID;
+        UShort_t SourceStat;
+        Int_t NRopes;
+        Float_t ManipPos[3];
+        Float_t ManipDest[3];
+        Float_t SrcPosUncert1;
+        Float_t SrcPosUncert2[3];
+        Float_t LBallOrient;
+        UInt_t* RopeID; //[NRopes]
+        Float_t* RopeLen; //[NRopes]
+        Float_t* RopeTargLen; //[NRopes]
+        Float_t* RopeVel; //[NRopes]
+        Float_t* RopeTens; //[NRopes]
+        Float_t* RopeErr; //[NRopes]
+
+        ClassDef(CAST,2)
 };
 
-class CAAC : public TObject {
-public:
-  CAAC() : TObject() { Init(); };
-  CAAC(const CAAC &rhs) : TObject() { Init(); CopyObj(rhs); };
-  virtual ~CAAC() {};
-  virtual CAAC &operator=(const CAAC &rhs) { CopyObj(rhs); return *this; };
+class CAAC: public TObject {
+    public:
+        CAAC(): TObject(),
+            AVPos(), AVRoll(), AVRopeLength() {}
 
-  // Members
-  float AVPos[3];
-  float AVRoll[3];  // roll, pitch and yaw
-  float AVRopeLength[7];
+        virtual ~CAAC() {}
 
-  // ROOT junk
-  ClassDef(CAAC,2)
+        CAAC(const CAAC &src): TObject(),
+            AVPos(), AVRoll(), AVRopeLength() {
 
-protected:
-  virtual void Init() {
-    for(int i=0;i<3;++i){
-      AVPos[i] = 0.;
-      AVRoll[i] = 0.;
-    }
-    for(int i=0;i<7;++i){
-      AVRopeLength[i] = 0.;
-    }
-  }
+            memcpy(AVPos, src.AVPos, 3 * sizeof(Float_t));
+            memcpy(AVRoll, src.AVRoll, 3 * sizeof(Float_t));
+            memcpy(AVRopeLength, src.AVRopeLength, 7 * sizeof(Float_t));
+        }
 
-  virtual void CopyObj(const CAAC &rhs) {
-    for(int i=0;i<3;++i){
-      AVPos[i] = rhs.AVPos[i];
-      AVRoll[i] = rhs.AVRoll[i];
-    }
-    for(int i=0;i<7;++i){
-      AVRopeLength[i] = rhs.AVRopeLength[i];
-    }
-  }
+        CAAC &operator=(const CAAC &rhs) {
+            if (&rhs == this) return *this;
+            memcpy(AVPos, rhs.AVPos, 3 * sizeof(Float_t));
+            memcpy(AVRoll, rhs.AVRoll, 3 * sizeof(Float_t));
+            memcpy(AVRopeLength, rhs.AVRopeLength, 7 * sizeof(Float_t));
+            return *this;
+        }
+
+        Float_t AVPos[3];
+        Float_t AVRoll[3];
+        Float_t AVRopeLength[7];
+
+        ClassDef(CAAC, 2)
+};
+
+class CMOSRate: public TObject {
+    public:
+        CMOSRate(): TObject(),
+            Crate(0), SlotMask(0), ChannelMask(), Delay(0),
+            ErrorFlags(0), Rate() {}
+
+        virtual ~CMOSRate() {}
+
+        CMOSRate(const CMOSRate &src): TObject(),
+            Crate(src.Crate), SlotMask(src.SlotMask), ChannelMask(),
+            Delay(src.Delay), ErrorFlags(src.ErrorFlags), Rate() {
+
+            memcpy(ChannelMask, src.ChannelMask, 16 * sizeof(UInt_t));
+            memcpy(Rate, src.Rate, 8 * 32 * sizeof(Float_t));
+        }
+
+        CMOSRate &operator=(const CMOSRate &rhs) {
+            if (&rhs == this) return *this;
+            Crate = rhs.Crate;
+            SlotMask = rhs.SlotMask; 
+            memcpy(ChannelMask, rhs.ChannelMask, 16 * sizeof(UInt_t));
+            Delay = rhs.Delay;
+            ErrorFlags = rhs.ErrorFlags;
+            memcpy(Rate, rhs.Rate, 8 * 32 * sizeof(Float_t));
+            return *this;
+        }
+
+        UInt_t Crate;
+        UInt_t SlotMask;
+        UInt_t ChannelMask[16];
+        UInt_t Delay;
+        UInt_t ErrorFlags;
+        Float_t Rate[8 * 32]; //up to 8 slots as shipped by XL3
+
+        ClassDef(CMOSRate, 2)
+};
+
+class FIFOState: public TObject {
+    public:
+        FIFOState(): TObject(),
+            Crate(0), Fifo(), Xl3Ram(0) {}
+
+        virtual ~FIFOState() {}
+
+        FIFOState(const FIFOState &src): TObject(),
+            Crate(src.Crate), Fifo(), Xl3Ram(src.Xl3Ram) {
+
+            memcpy(Fifo, src.Fifo, 16 * sizeof(Float_t));
+        }
+
+        FIFOState &operator=(const FIFOState &rhs) {
+            if (&rhs == this) return *this;
+            Crate = rhs.Crate;
+            memcpy(Fifo, rhs.Fifo, 16 * sizeof(Float_t));
+            Xl3Ram = rhs.Xl3Ram;
+            return *this;
+        }
+
+        UInt_t Crate;
+        Float_t Fifo[16];
+        Float_t Xl3Ram;
+
+        ClassDef(FIFOState, 2)
 };
 
 } // namespace SNOT
@@ -524,5 +617,9 @@ protected:
     #pragma link C++ class std::vector<SNOT::CAAC>;
     #pragma link C++ class SNOT::CAST;
     #pragma link C++ class std::vector<SNOT::CAST>;
+    #pragma link C++ class SNOT::CMOSRate;
+    #pragma link C++ class std::vector<SNOT::CMOSRate>;
+    #pragma link C++ class SNOT::FIFOState;
+    #pragma link C++ class std::vector<SNOT::FIFOState>;
 #endif //__MAKECINT__
 
